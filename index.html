@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>팝팝도쿄 · 도쿄 팝업스토어 여행 가이드</title>
+<meta name="description" content="도쿄 여행 일정에 맞춰 지금 열려 있는 팝업스토어를 지역·날짜·카테고리로 찾아보세요.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --red:#E8402F; --red-dark:#C2301F; --ink:#1A1A1A; --sub:#666; --line:#E6E1D8;
+  --paper:#FAF7F2; --card:#FFF; --chip:#F1ECE3;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:Pretendard,"Malgun Gothic",system-ui,sans-serif;font-size:16px;line-height:1.6;letter-spacing:-0.01em;word-break:keep-all}
+a{color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+
+header.hero{background:var(--ink);color:#fff;padding:56px 0 40px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-80px;top:-80px;width:280px;height:280px;border-radius:50%;background:var(--red)}
+.hero .wrap{position:relative;z-index:1}
+.logo{font-weight:800;font-size:15px;letter-spacing:.08em;color:#fff;opacity:.85}
+.hero h1{font-size:clamp(34px,7vw,64px);line-height:1.15;margin:16px 0 12px;font-weight:800;letter-spacing:-0.03em}
+.hero h1 em{font-style:normal;color:var(--red)}
+.hero p{margin:0;color:#ccc;max-width:560px}
+.stamp{display:inline-block;margin-top:20px;font-size:13px;border:1px solid #555;border-radius:999px;padding:4px 12px;color:#bbb}
+
+.filters{position:sticky;top:0;z-index:5;background:rgba(250,247,242,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:14px 0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0}
+.row .label{font-size:13px;font-weight:700;color:var(--sub);min-width:56px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 14px;font:inherit;font-size:14px;cursor:pointer;min-height:36px}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.dates{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.dates input{font:inherit;font-size:14px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);min-height:36px}
+.reset{background:none;border:0;color:var(--red-dark);font:inherit;font-size:14px;text-decoration:underline;cursor:pointer}
+
+main{padding:24px 0 48px}
+.count{font-size:14px;color:var(--sub);margin:0 0 16px}
+.count b{color:var(--ink)}
+.count.trip{background:var(--ink);color:#fff;border-radius:12px;padding:12px 16px;font-size:15px}
+.count.trip b{color:var(--red)}
+.flash{animation:flash .6s ease}
+@keyframes flash{from{background:var(--red)}}
+.fit{font-size:13px;font-weight:700;color:var(--red-dark)}
+@media (prefers-reduced-motion:reduce){.flash{animation:none}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.meta{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--chip);color:#555}
+.tag.live{background:var(--red);color:#fff}
+.tag.soon{background:#2B4C7E;color:#fff}
+.card h2{font-size:18px;line-height:1.35;margin:4px 0 0}
+.card .ja{font-size:13px;color:var(--sub);margin:0}
+.when{font-weight:700;font-size:15px}
+.where{font-size:14px;color:#444}
+.links{margin-top:auto;padding-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none}
+.btn.map{background:var(--red);color:#fff}
+.btn.map:hover{background:var(--red-dark)}
+.btn.src{border:1px solid var(--line);color:#444}
+.empty{text-align:center;color:var(--sub);padding:48px 0}
+
+footer{border-top:1px solid var(--line);padding:24px 0 40px;font-size:13px;color:var(--sub)}
+footer p{margin:4px 0}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="logo">POPPOP TOKYO</div>
+    <h1>내 도쿄 여행 날짜에<br><em>열려 있는 팝업</em>만.</h1>
+    <p>시부야·하라주쿠·이케부쿠로·아키하바라·나카노… 흩어진 일본어 팝업 정보를 한국어로 모았습니다. 여행 날짜를 넣으면 그 기간에 열리는 곳만 보여 드려요.</p>
+    <span class="stamp" id="stamp"></span>
+  </div>
+</header>
+
+<section class="filters" aria-label="필터">
+  <div class="wrap">
+    <div class="row">
+      <span class="label">여행 날짜</span>
+      <div class="dates">
+        <input type="date" id="from" aria-label="여행 시작일" autocomplete="off"> ~
+        <input type="date" id="to" aria-label="여행 종료일" autocomplete="off">
+      </div>
+      <button class="reset" id="reset">초기화</button>
+    </div>
+    <div class="row" id="periodRow"><span class="label">기간</span></div>
+    <div class="row" id="areaRow"><span class="label">지역</span></div>
+    <div class="row" id="catRow"><span class="label">카테고리</span></div>
+  </div>
+</section>
+
+<main class="wrap">
+  <p class="count" id="count"></p>
+  <div class="grid" id="grid"></div>
+  <p class="empty" id="empty" hidden>조건에 맞는 팝업이 없어요. 날짜나 지역을 바꿔 보세요.</p>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><b>팝팝도쿄</b> · 도쿄 팝업스토어 한국어 정보 모음</p>
+    <p>정보는 <span id="checked"></span> 기준 공식 발표·정보 사이트를 조사해 정리했습니다. 일정은 바뀌거나 조기 종료될 수 있으니 방문 전 각 카드의 '출처'에서 꼭 다시 확인하세요.</p>
+    <p>종료된 팝업은 자동으로 숨겨집니다.</p>
+  </div>
+</footer>
+
+<script>
+// 조사일. 데이터를 갱신하면 이 값도 바꾼다.
+var CHECKED = "2026-10-15";
+
+// end: null = 종료일 미발표
+var POPUPS = [
+  {name:"미피 스타일 팝업숍", ja:"miffy style POP UP SHOP in 有楽町", area:"긴자·유라쿠초", cat:"캐릭터", start:"2026-10-02", end:"2026-10-19", venue:"유라쿠초 마루이 1층", q:"有楽町マルイ", src:"https://www.enjoytokyo.jp/event/list/cat0209/"},
+  {name:"투러브루 20주년 팝업숍", ja:"To LOVEる 20周年記念 POP UP SHOP", area:"시부야", cat:"애니·게임", start:"2026-10-08", end:"2026-11-02", venue:"SHIBUYA TSUTAYA 6층 IP서점", q:"SHIBUYA TSUTAYA", src:"https://collabo-cafe.com/events/collabo/to-loveru-popup-shibuya-tsutaya-2026/"},
+  {name:"하늘은 붉은 강가 팝업스토어", ja:"天は赤い河のほとり POP UP STORE", area:"시부야", cat:"애니·게임", start:"2026-10-15", end:"2026-11-02", venue:"시부야 로프트 6층", q:"渋谷ロフト", src:"https://collabo-cafe.com/events/collabo/tenkawa-popup-shibuya-loft-2026/"},
+  {name:"퍼펙트 어딕션 스토어", ja:"Perfect Addiction Store", area:"시부야", cat:"애니·게임", start:"2026-10-09", end:"2026-10-18", venue:"DNP PLAZA SHIBUYA · Tokyo Anime Center", q:"Tokyo Anime Center DNP PLAZA SHIBUYA", src:"https://collabo-cafe.com/en/events/tag/shibuya/"},
+  {name:"하스노소라 고딕펑크 컬렉션 팝업", ja:"蓮ノ空 Gothic Punk Collection POP-UP SHOP", area:"시부야", cat:"애니·게임", start:"2026-10-09", end:"2026-10-25", venue:"시부야 모디 2층 · Tokyo Anime Center", q:"渋谷モディ", src:"https://collabo-cafe.com/en/events/tag/shibuya/"},
+  {name:"나이키스킴스 팝업", ja:"NikeSKIMS POP-UP", area:"하라주쿠·오모테산도", cat:"패션", start:"2026-10-01", end:"2026-11-03", venue:"하라주쿠 (11:00~20:00)", q:"NikeSKIMS 原宿", src:"https://www.fashionsnap.com/article/2026-09-30/nikeskims-popup/"},
+  {name:"A.P.C. 데님 팝업", ja:"A.P.C. デニム POPUP", area:"하라주쿠·오모테산도", cat:"패션", start:"2026-10-01", end:"2026-10-31", venue:"A.P.C. 하라주쿠", q:"A.P.C. 原宿", src:"https://popuppost.jp/area/tokyo"},
+  {name:"KLD 스톡 세일 (최대 80% 할인)", ja:"KLD STOCK SALE POP UP STORE", area:"하라주쿠·오모테산도", cat:"패션", start:"2026-10-23", end:"2026-10-25", venue:"HATTO COFFEE 하라주쿠", q:"HATTO COFFEE 原宿", src:"https://store.kld-c.jp/blogs/kld-topics/2026-10-23-pop-up-store"},
+  {name:"피클스 더 프로그 팝업", ja:"Pickles the Frog POP UP", area:"신주쿠", cat:"캐릭터", start:"2026-10-07", end:"2026-10-19", venue:"오다큐 백화점 신주쿠점", q:"小田急百貨店新宿店", src:"https://eventstokyo.com/ja/collections/pop-up-stores"},
+  {name:"더 미스테리어스 호텔", ja:"THE MYSTERIOUS HOTEL", area:"신주쿠", cat:"라이프스타일", start:"2026-10-10", end:"2026-10-18", venue:"루미네 에스트 신주쿠 B1 EDITAL", q:"ルミネエスト新宿", src:"https://www.enjoytokyo.jp/event/list/cat0209/"},
+  {name:"VIRUSWEETS 팝업스토어", ja:"VIRUSWEETS POP-UP STORE", area:"이케부쿠로", cat:"캐릭터", start:"2026-10-09", end:"2026-10-18", venue:"선샤인시티 · 반다이남코 Cross Store 도쿄 (입장 무료)", q:"バンダイナムコ Cross Store 東京 サンシャインシティ", src:"https://collabo-cafe.com/events/collabo/virusweets-popup-store-tokyo-2026/"},
+  {name:"페르소나 Memoria", ja:"ペルソナ Memoria", area:"이케부쿠로", cat:"애니·게임", start:"2026-10-09", end:"2026-12-06", venue:"선샤인시티 · 반다이남코 Cross Store 도쿄", q:"バンダイナムコ Cross Store 東京 サンシャインシティ", src:"https://collabo-cafe.com/events/tag/sun-shine-city/"},
+  {name:"헬로키티 팝업스토어 in 이케부쿠로역", ja:"ハローキティ POP-UP STORE in 池袋駅", area:"이케부쿠로", cat:"캐릭터", start:"2026-10-13", end:"2026-10-26", venue:"JR 이케부쿠로역 남쪽 개찰구 앞", q:"JR池袋駅 南改札", src:"https://www.enjoytokyo.jp/event/list/area1303/cat0209/"},
+  {name:"마법기사 레이어스 팝업숍", ja:"魔法騎士レイアース POP UP SHOP in 池袋", area:"이케부쿠로", cat:"애니·게임", start:"2026-10-28", end:"2026-11-10", venue:"JR 이케부쿠로역 지하 중앙통로 · 이케부쿠로 스키마스토어", q:"池袋スキマストア", src:"https://www.enjoytokyo.jp/event/list/area1303/cat0209/"},
+  {name:"학교생활! 팝업스토어", ja:"がっこうぐらし! ポップアップストア", area:"아키하바라", cat:"애니·게임", start:"2026-10-17", end:"2026-11-01", venue:"AKIHABARA 게이머즈 본점 1층", q:"AKIHABARAゲーマーズ本店", src:"https://collabo-cafe.com/events/collabo/school-live-gamers-pop-up-store-akihabara-2026/"},
+  {name:"전격문고 올스타 팝업숍", ja:"電撃文庫オールスター POP UP SHOP", area:"아키하바라", cat:"애니·게임", start:"2026-10-10", end:"2026-10-25", venue:"애니메이트 아키하바라 1호관", q:"アニメイト秋葉原1号館", src:"https://akiba.reload.co.jp/events/popup/"},
+  {name:"호오즈키의 냉철 팝업스토어", ja:"鬼灯の冷徹 POP UP STORE", area:"나카노", cat:"애니·게임", start:"2026-09-18", end:"2026-10-19", venue:"나카노 브로드웨이 3층 · 하카바노 가로 (입장 무료)", q:"墓場の画廊 中野店", src:"https://hakabanogarou.jp/nakano"},
+  {name:"노라가미 굿즈 대집결", ja:"ノラガミ グッズ大集結！", area:"나카노", cat:"애니·게임", start:"2026-10-01", end:"2026-10-19", venue:"나카노 브로드웨이 3층 · 하카바노 가로", q:"墓場の画廊 中野店", src:"https://hakabanogarou.jp/nakano"},
+  {name:"메탈히어로 팝업스토어 (우주형사 갸반 · 지라이야)", ja:"メタルヒーローPOP UP STORE", area:"나카노", cat:"애니·게임", start:"2026-10-22", end:null, venue:"나카노 브로드웨이 3층 · 하카바노 가로", q:"墓場の画廊 中野店", src:"https://hakabanogarou.jp/nakano"},
+  {name:"산리오 모코모코 아웃팅 스토어", ja:"Sanrio Mokomoko Outing Store", area:"도쿄역", cat:"캐릭터", start:"2026-10-16", end:null, venue:"도쿄역 1번가 · 도쿄 캐릭터 스트리트", q:"東京キャラクターストリート", src:"https://eventstokyo.com/ja/collections/pop-up-stores"},
+  {name:"리모와 'Life Cycles'", ja:"RIMOWA Life Cycles", area:"긴자·유라쿠초", cat:"패션", start:"2026-10-16", end:"2026-10-18", venue:"Ginza Sony Park", q:"Ginza Sony Park", src:"https://eventstokyo.com/ja/collections/pop-up-stores"},
+  {name:"andoor 첫 팝업 (서울 로컬 컬처)", ja:"andoor POP UP STORE", area:"후타코타마가와", cat:"라이프스타일", start:"2026-10-01", end:"2026-10-31", venue:"후타코타마가와 츠타야 가전 2층 갤러리", q:"二子玉川 蔦屋家電", src:"https://www.enjoytokyo.jp/event/list/cat0209/"}
+];
+
+var $ = function(id){ return document.getElementById(id); };
+var today = new Date().toLocaleDateString("sv"); // 로컬 날짜 YYYY-MM-DD
+var state = { area:"전체", cat:"전체", period:"전체" };
+
+// 연도·분기 칩: 아직 안 끝난 팝업이 걸쳐 있는 기간만 만든다. 라벨 → [시작일, 종료일]
+var periods = {};
+(function(){
+  var qEnd = ["03-31","06-30","09-30","12-31"], ks = [];
+  function idx(d){ return +d.slice(0,4) * 4 + Math.ceil(d.slice(5,7) / 3) - 1; }
+  POPUPS.forEach(function(p){
+    var a = p.start > today ? p.start : today, b = p.end || a;   // 종료일 미발표면 시작(또는 오늘) 분기만
+    for (var k = idx(a); k <= idx(b); k++) if (ks.indexOf(k) < 0) ks.push(k);
+  });
+  ks.sort(function(a,b){ return a - b; }).forEach(function(k){
+    var y = Math.floor(k / 4), q = k % 4 + 1;
+    if (!periods[y + "년"]) periods[y + "년"] = [y + "-01-01", y + "-12-31"];
+    periods[y + "년 " + q + "분기"] = [y + "-" + ("0" + (q * 3 - 2)).slice(-2) + "-01", y + "-" + qEnd[q - 1]];
+  });
+})();
+
+function chips(rowId, key, values){
+  ["전체"].concat(values).forEach(function(v){
+    var b = document.createElement("button");
+    b.className = "chip"; b.textContent = v;
+    b.setAttribute("aria-pressed", v === "전체");
+    b.onclick = function(){
+      state[key] = v;
+      $(rowId).querySelectorAll(".chip").forEach(function(c){ c.setAttribute("aria-pressed", c === b); });
+      render();
+    };
+    $(rowId).appendChild(b);
+  });
+}
+function uniq(key){ return POPUPS.map(function(p){ return p[key]; }).filter(function(v,i,a){ return a.indexOf(v) === i; }); }
+
+function fmt(d){ var p = d.split("-"); return +p[1] + "." + +p[2]; }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+// 여행 기간 중 일부만 열리면 알려 준다
+function fit(p, from, to){
+  var msg = [];
+  if (from && p.start > from) msg.push(fmt(p.start) + "부터 열려요");
+  if (to && p.end && p.end < to) msg.push(fmt(p.end) + "에 끝나요");
+  return msg.length ? '<div class="fit">⚠ 여행 중 ' + msg.join(", ") + '</div>' : "";
+}
+
+function render(){
+  var from = $("from").value, to = $("to").value;
+  var list = POPUPS.filter(function(p){
+    var end = p.end || "9999-12-31";
+    if (end < today) return false;                       // 종료됨
+    if (state.area !== "전체" && p.area !== state.area) return false;
+    if (state.cat !== "전체" && p.cat !== state.cat) return false;
+    var r = periods[state.period];
+    if (r && (end < r[0] || p.start > r[1])) return false;   // 고른 기간과 겹치지 않음
+    if (from && end < from) return false;                // 여행 시작 전에 끝남
+    if (to && p.start > to) return false;                // 여행 끝난 뒤 시작
+    return true;
+  }).sort(function(a,b){ return (a.end || "9999") < (b.end || "9999") ? -1 : 1; });
+
+  var c = $("count"), trip = from || to;
+  c.className = "count" + (trip ? " trip" : "");
+  c.innerHTML = trip
+    ? (from ? fmt(from) : "") + " ~ " + (to ? fmt(to) : "") + " 여행 중 열려 있는 팝업 <b>" + list.length + "</b>곳 · 전체 " + POPUPS.filter(function(p){ return (p.end || "9999") >= today; }).length + "곳 중"
+    : "팝업 <b>" + list.length + "</b>곳 · 곧 끝나는 순";
+  if (trip) { c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash"); }   // 바뀐 걸 눈에 띄게
+  $("empty").hidden = list.length > 0;
+  $("grid").innerHTML = list.map(function(p){
+    var live = p.start <= today;
+    var map = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(p.q);
+    return '<article class="card">' +
+      '<div class="meta"><span class="tag ' + (live ? "live" : "soon") + '">' + (live ? "진행 중" : "오픈 예정") + '</span>' +
+      '<span class="tag">' + esc(p.area) + '</span><span class="tag">' + esc(p.cat) + '</span></div>' +
+      '<h2>' + esc(p.name) + '</h2><p class="ja" lang="ja">' + esc(p.ja) + '</p>' +
+      '<div class="when">' + fmt(p.start) + ' ~ ' + (p.end ? fmt(p.end) : "종료일 미발표") + '</div>' +
+      '<div class="where">📍 ' + esc(p.venue) + '</div>' + fit(p, from, to) +
+      '<div class="links"><a class="btn map" href="' + map + '" target="_blank" rel="noopener">구글맵 열기</a>' +
+      '<a class="btn src" href="' + esc(p.src) + '" target="_blank" rel="noopener">출처</a></div>' +
+      '</article>';
+  }).join("");
+}
+
+// 사파리 등은 날짜칸에서 change만 보내므로 둘 다 듣는다
+function onDate(e){
+  var from = $("from"), to = $("to");
+  to.min = from.value || today;
+  if (from.value && to.value && to.value < from.value) {   // 순서가 뒤집히면 반대쪽을 맞춘다
+    if (e && e.target === from) to.value = from.value; else from.value = to.value;
+  }
+  render();
+}
+["input","change"].forEach(function(ev){
+  $("from").addEventListener(ev, onDate);
+  $("to").addEventListener(ev, onDate);
+});
+// 뒤로가기·새로고침 때 브라우저가 이전 날짜를 다시 채워 넣으면 목록도 맞춘다
+window.addEventListener("pageshow", function(){ onDate(); });
+$("reset").onclick = function(){
+  $("from").value = $("to").value = "";
+  state.area = state.cat = state.period = "전체";
+  document.querySelectorAll(".chip").forEach(function(c){ c.setAttribute("aria-pressed", c.textContent === "전체"); });
+  onDate();
+};
+
+chips("periodRow", "period", Object.keys(periods));
+chips("areaRow", "area", uniq("area"));
+chips("catRow", "cat", uniq("cat"));
+$("from").min = $("to").min = today;
+$("stamp").textContent = "정보 확인일 " + CHECKED;
+$("checked").textContent = CHECKED;
+render();
+</script>
+</body>
+</html>
